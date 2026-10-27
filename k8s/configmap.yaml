@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: autoservice-billing
+  namespace: autoservice-billing
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://autoservice-billing-db:5432/autoservice_billing
+  SPRING_DATASOURCE_USERNAME: autoservice
+  SPRING_RABBITMQ_HOST: rabbitmq
+  SPRING_RABBITMQ_PORT: "5672"
+  SPRING_RABBITMQ_USERNAME: guest
+  PAGAMENTO_SIMULADO: "false"
+  MERCADOPAGO_BASE_URL: https://api.mercadopago.com
+  MERCADOPAGO_EXTERNAL_POS_ID: autoservice-pos
+  MAIL_ENABLED: "false"

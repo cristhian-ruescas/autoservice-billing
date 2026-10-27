@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoservice-billing
+  namespace: autoservice-billing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autoservice-billing
+  template:
+    metadata:
+      labels:
+        app: autoservice-billing
+    spec:
+      containers:
+        - name: autoservice-billing
+          image: ghcr.io/autoservice/autoservice-billing:latest
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: autoservice-billing
+          env:
+            - name: AUTOSERVICE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: autoservice-billing
+                  key: AUTOSERVICE_JWT_SECRET
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: autoservice-billing
+                  key: SPRING_DATASOURCE_PASSWORD
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: autoservice-billing
+                  key: SPRING_RABBITMQ_PASSWORD
+            - name: MERCADOPAGO_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: autoservice-billing
+                  key: MERCADOPAGO_ACCESS_TOKEN
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi

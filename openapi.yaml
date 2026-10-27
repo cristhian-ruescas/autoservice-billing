@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Autoservice Billing
+  version: 0.0.1
+  description: Orcamento, aprovacao e pagamento Mercado Pago.
+servers:
+  - url: http://localhost:8082
+paths:
+  /orcamentos/{ordemServicoId}:
+    get:
+      summary: Consulta o orcamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ordemServicoId"
+      responses:
+        "200":
+          description: Orcamento
+  /orcamentos/{ordemServicoId}/aprovacao:
+    post:
+      summary: Aprova e cria a ordem QR no Mercado Pago
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ordemServicoId"
+      responses:
+        "200":
+          description: Pagamento
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pagamento"
+  /orcamentos/{ordemServicoId}/reprovacao:
+    post:
+      summary: Reprova o orcamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ordemServicoId"
+      responses:
+        "200":
+          description: Orcamento reprovado
+  /pagamentos/{ordemServicoId}:
+    get:
+      summary: Consulta o pagamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ordemServicoId"
+      responses:
+        "200":
+          description: Pagamento
+  /pagamentos/webhook:
+    post:
+      summary: Webhook do Mercado Pago
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+      responses:
+        "200":
+          description: Aceito
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ordemServicoId:
+      name: ordemServicoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Pagamento:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ordemServicoId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        mpOrderId:
+          type: string
+        qrData:
+          type: string
+        valor:
+          type: number

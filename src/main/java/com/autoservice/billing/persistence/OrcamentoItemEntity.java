@@ -1,0 +1,40 @@
+package com.autoservice.billing.persistence;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "orcamento_item")
+public class OrcamentoItemEntity {
+
+    @Id
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(length = 36)
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "orcamento_id", nullable = false)
+    private OrcamentoEntity orcamento;
+
+    @Column(nullable = false, length = 500)
+    private String descricao;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal valor;
+}

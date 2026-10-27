@@ -1,0 +1,57 @@
+{
+  "info": {
+    "name": "Autoservice Billing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8082" },
+    { "key": "token", "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImNwZiI6IjM5MDUzMzQ0NzA1IiwiZXhwIjoxODkzNDU2MDAwfQ.esAWLnLoA83kreRAiWZbz2K_jCZ1c4ndLuthywsl-SM" },
+    { "key": "ordemId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Consultar orcamento",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/orcamentos/{{ordemId}}"
+      }
+    },
+    {
+      "name": "Aprovar",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/orcamentos/{{ordemId}}/aprovacao"
+      }
+    },
+    {
+      "name": "Reprovar",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/orcamentos/{{ordemId}}/reprovacao"
+      }
+    },
+    {
+      "name": "Consultar pagamento",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/pagamentos/{{ordemId}}"
+      }
+    },
+    {
+      "name": "Webhook Mercado Pago",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/pagamentos/webhook",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"order\",\n  \"data\": { \"id\": \"ORD01\" }\n}"
+        }
+      }
+    }
+  ]
+}
