@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {OrcamentoController.class, PagamentoController.class})
-@Import({SecurityConfig.class, JwtService.class, ApiExceptionHandler.class})
+@Import({SecurityConfig.class, JwtService.class, ApiExceptionHandler.class, com.autoservice.billing.observability.ObservabilityWebMvcTestConfig.class})
 @TestPropertySource(properties = "autoservice.jwt.secret=test-secret-test-secret-test-secret")
 class BillingApiTest {
 
