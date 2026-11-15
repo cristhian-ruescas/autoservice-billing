@@ -20,3 +20,5 @@ autoservice:
     simulado: true
   mail:
     enabled: false
+
+DD_METRICS_EXPORT: "false"

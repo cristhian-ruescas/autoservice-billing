@@ -11,6 +11,7 @@ import com.autoservice.billing.messaging.EventoSaga;
 import com.autoservice.billing.messaging.MensagemSaga;
 import com.autoservice.billing.messaging.Payloads;
 import com.autoservice.billing.messaging.TiposEvento;
+import com.autoservice.billing.observability.BillingMetrics;
 import com.autoservice.billing.orcamento.OrcamentoEmailSender;
 import com.autoservice.billing.orcamento.OrcamentoPdf;
 import com.autoservice.billing.pagamento.CriarOrdemMp;
@@ -39,19 +40,22 @@ public class BillingService {
     private final MensagemSaga mensagemSaga;
     private final MercadoPagoClient mercadoPagoClient;
     private final OrcamentoEmailSender emailSender;
+    private final BillingMetrics metrics;
 
     public BillingService(
             final OrcamentoRepository orcamentos,
             final PagamentoRepository pagamentos,
             final MensagemSaga mensagemSaga,
             final MercadoPagoClient mercadoPagoClient,
-            final OrcamentoEmailSender emailSender
+            final OrcamentoEmailSender emailSender,
+            final BillingMetrics metrics
     ) {
         this.orcamentos = orcamentos;
         this.pagamentos = pagamentos;
         this.mensagemSaga = mensagemSaga;
         this.mercadoPagoClient = mercadoPagoClient;
         this.emailSender = emailSender;
+        this.metrics = metrics;
     }
 
     @Transactional
@@ -65,6 +69,7 @@ public class BillingService {
         final List<ItemSnapshot> itens = Payloads.itens(evento.payload());
         final BigDecimal total = ItemSnapshot.total(itens);
         if (itens.isEmpty() || total.signum() <= 0) {
+            this.metrics.registrarOrcamento("falhou");
             publicar(TiposEvento.ORCAMENTO_FALHOU, evento, Map.of("motivo", "valor invalido"));
             return;
         }
@@ -93,6 +98,7 @@ public class BillingService {
                 "orcamentoId", orcamento.getId().toString(),
                 "valorTotal", total
         ));
+        this.metrics.registrarOrcamento("emitido");
     }
 
     @Transactional
@@ -120,6 +126,7 @@ public class BillingService {
         this.pagamentos.save(pagamento);
         this.orcamentos.save(orcamento);
         publicarResultado(pagamento, mercadoPago);
+        this.metrics.registrarOrcamento("aprovado");
         return PagamentoResponse.de(pagamento);
     }
 
@@ -135,6 +142,7 @@ public class BillingService {
         publicar(TiposEvento.ORCAMENTO_REPROVADO, orcamento.getOrdemServicoId(), orcamento.getCorrelationId(), Map.of(
                 "orcamentoId", orcamento.getId().toString()
         ));
+        this.metrics.registrarOrcamento("reprovado");
         return OrcamentoResponse.de(orcamento);
     }
 
@@ -174,6 +182,7 @@ public class BillingService {
                 "pagamentoId", pagamento.getId().toString(),
                 "mpOrderId", pagamento.getMpOrderId() == null ? "" : pagamento.getMpOrderId()
         ));
+        this.metrics.registrarCompensacao();
     }
 
     @Transactional(readOnly = true)
@@ -194,8 +203,10 @@ public class BillingService {
         payload.put("qrData", mercadoPago.qrData() == null ? "" : mercadoPago.qrData());
         if (mercadoPago.aprovado() && pagamento.getStatus() == PagamentoStatus.APROVADO) {
             publicar(TiposEvento.PAGAMENTO_APROVADO, pagamento.getOrdemServicoId(), pagamento.getCorrelationId(), payload);
+            this.metrics.registrarPagamento("aprovado");
         } else if (mercadoPago.recusado() && pagamento.getStatus() == PagamentoStatus.RECUSADO) {
             publicar(TiposEvento.PAGAMENTO_RECUSADO, pagamento.getOrdemServicoId(), pagamento.getCorrelationId(), payload);
+            this.metrics.registrarPagamento("recusado");
         }
     }
 

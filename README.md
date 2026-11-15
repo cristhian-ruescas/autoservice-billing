@@ -28,6 +28,8 @@ Porta `8082`. Swagger em `/swagger-ui.html`. OpenAPI em `openapi.yaml`. Collecti
 
 A malha com OS, execução, Postgres, Mongo e RabbitMQ sobe pelo Compose do repositório `autoservice-os` (`docker/docker-compose.yml`).
 
+Observabilidade Datadog (dashboard/monitors compartilhados): repositório `autoservice-os`, pasta `docs/observability/`.
+
 ## Kubernetes
 
 ```bash

@@ -49,6 +49,8 @@ class BillingServiceTest {
     private MercadoPagoClient mercadoPagoClient;
     @Mock
     private OrcamentoEmailSender emailSender;
+    @Mock
+    private com.autoservice.billing.observability.BillingMetrics metrics;
     @InjectMocks
     private BillingService service;
 

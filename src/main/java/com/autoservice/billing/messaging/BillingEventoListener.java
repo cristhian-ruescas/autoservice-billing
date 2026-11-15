@@ -1,6 +1,7 @@
 package com.autoservice.billing.messaging;
 
 import com.autoservice.billing.config.RabbitConfig;
+import com.autoservice.billing.observability.SagaEventMdc;
 import com.autoservice.billing.service.BillingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class BillingEventoListener {
         if (evento == null || evento.eventType() == null) {
             return;
         }
+        SagaEventMdc.apply(evento);
         try {
             switch (evento.eventType()) {
                 case TiposEvento.ORCAMENTO_SOLICITADO -> this.billingService.gerar(evento);
@@ -34,6 +36,8 @@ public class BillingEventoListener {
             }
         } catch (RuntimeException exception) {
             LOGGER.error("Falha ao tratar evento {}", evento.eventId(), exception);
+        } finally {
+            SagaEventMdc.clear();
         }
     }
 }

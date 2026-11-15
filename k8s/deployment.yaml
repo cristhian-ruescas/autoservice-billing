@@ -12,6 +12,10 @@ spec:
     metadata:
       labels:
         app: autoservice-billing
+        tags.datadoghq.com/env: homolog
+        tags.datadoghq.com/service: autoservice-billing
+      annotations:
+        ad.datadoghq.com/autoservice-billing.logs: '[{"source":"java","service":"autoservice-billing"}]'
     spec:
       containers:
         - name: autoservice-billing
@@ -22,6 +26,10 @@ spec:
             - configMapRef:
                 name: autoservice-billing
           env:
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
             - name: AUTOSERVICE_JWT_SECRET
               valueFrom:
                 secretKeyRef:

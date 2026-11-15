@@ -13,3 +13,8 @@ data:
   MERCADOPAGO_BASE_URL: https://api.mercadopago.com
   MERCADOPAGO_EXTERNAL_POS_ID: autoservice-pos
   MAIL_ENABLED: "false"
+  DD_ENV: homolog
+  DD_SERVICE: autoservice-billing
+  DD_TRACE_ENABLED: "true"
+  DD_LOGS_INJECTION: "true"
+  DD_METRICS_EXPORT: "true"
