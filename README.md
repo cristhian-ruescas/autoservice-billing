@@ -1,20 +1,43 @@
-# autoservice-billing
+# autoservice-billing — Fase 4
 
-Microsserviço de orçamento e pagamento. PostgreSQL próprio. Não acessa o banco da OS nem o Mongo da execução.
+Microsserviço de **orçamento e pagamento**. PostgreSQL próprio. Não acessa o banco da OS nem o Mongo da execução.
+
+Parte da entrega **Fase 4** (saga + microsserviços).
+
+## Qualidade
+
+| Item | Status |
+|------|--------|
+| Testes | `./mvnw verify` |
+| Cobertura | JaCoCo **≥ 80%** (gate no build) |
+| OpenAPI | [`openapi.yaml`](./openapi.yaml) · Swagger `/swagger-ui.html` |
+| Postman | `postman/` |
+| CI/CD | `.github/workflows/ci-cd.yml` — Test → Docker → Deploy Kind + health |
+| Lint / qualidade | pipeline + Sonar (quando `SONAR_TOKEN` presente) |
 
 ## Responsabilidades
 
 - Consome `orcamento.solicitado`, gera PDF do orçamento e publica `orcamento.emitido`
 - E-mail opcional (`MAIL_ENABLED=true`)
-- Aprovação cria o pagamento e publica `pagamento.aprovado` (ou `pagamento.recusado`)
+- Aprovação cria o pagamento; com simulação, a saga avança via webhook / resultado MP
 - Reprovação publica `orcamento.reprovado` (sem pagamento)
 - Compensação (`compensacao.pagamento.cancelar`) cancela o pagamento e publica `pagamento.cancelado`
 
 ## Pagamento (modo simulado)
 
-Por padrão a malha local e o compose usam **`PAGAMENTO_SIMULADO=true`**: o cliente simulado aprova na hora e a saga segue sem cobrança real.
+Homolog e Compose usam **`PAGAMENTO_SIMULADO=true`**: cliente simulado, sem cobrança real.
 
-Para integração externa real, desligue a simulação e configure `MERCADOPAGO_ACCESS_TOKEN` (e webhook público em `POST /pagamentos/webhook`).
+Para Mercado Pago real: desligar simulação e configurar `MERCADOPAGO_ACCESS_TOKEN` + webhook `POST /pagamentos/webhook`.
+
+## API
+
+| Método | Path |
+|--------|------|
+| GET | `/orcamentos/{ordemServicoId}` |
+| POST | `/orcamentos/{ordemServicoId}/aprovacao` |
+| POST | `/orcamentos/{ordemServicoId}/reprovacao` |
+| GET | `/pagamentos/{ordemServicoId}` |
+| POST | `/pagamentos/webhook` |
 
 ## Rodar
 
@@ -23,18 +46,14 @@ Para integração externa real, desligue a simulação e configure `MERCADOPAGO_
 ./mvnw spring-boot:run
 ```
 
-Porta `8082`. Swagger: `/swagger-ui.html`. OpenAPI: `openapi.yaml`. Postman: `postman/`.
+Porta `8082`. Malha completa: Compose em `autoservice-os/docker`.
 
-A malha completa (OS + execução + bancos + RabbitMQ) sobe pelo Compose em `autoservice-os/docker`.
-
-Observabilidade (Datadog): hub em `autoservice-os/docs/observability/`.
+Observabilidade: hub em `autoservice-os/docs/observability/`.
 
 ## CI/CD e Kubernetes
-
-Pipeline em `.github/workflows/` (testes, qualidade, imagem, deploy).
 
 ```bash
 kubectl kustomize k8s
 ```
 
-Secret de exemplo: `k8s/secret.example.yaml` (fora do kustomize). Em ambientes de demonstração, mantenha `PAGAMENTO_SIMULADO=true`.
+Secret de exemplo: `k8s/secret.example.yaml`. Em demonstração, mantenha `PAGAMENTO_SIMULADO=true`.

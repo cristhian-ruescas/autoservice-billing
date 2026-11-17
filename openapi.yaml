@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Autoservice Billing
   version: 0.0.1
-  description: Orcamento, aprovacao e pagamento Mercado Pago.
+  description: Fase 4 — orcamento, aprovacao e pagamento (Mercado Pago / simulado).
 servers:
   - url: http://localhost:8082
 paths:
